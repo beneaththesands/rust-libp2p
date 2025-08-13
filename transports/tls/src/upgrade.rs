@@ -60,6 +60,13 @@ impl Config {
             client: crate::make_client_config(identity, None)?,
         })
     }
+
+    pub fn new_from_configs(server_config: rustls::ServerConfig, client_config: rustls::ClientConfig) -> Result<Self, certificate::GenError> {
+        Ok(Self {
+            server: server_config,
+            client: client_config,
+        })
+    }
 }
 
 impl UpgradeInfo for Config {
