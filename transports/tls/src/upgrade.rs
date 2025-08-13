@@ -49,19 +49,19 @@ pub enum UpgradeError {
 
 #[derive(Clone)]
 pub struct Config {
-    server: rustls::ServerConfig,
-    client: rustls::ClientConfig,
+    server: Arc<rustls::ServerConfig>,
+    client: Arc<rustls::ClientConfig>,
 }
 
 impl Config {
     pub fn new(identity: &identity::Keypair) -> Result<Self, certificate::GenError> {
         Ok(Self {
-            server: crate::make_server_config(identity)?,
-            client: crate::make_client_config(identity, None)?,
+            server: Arc::new(crate::make_server_config(identity)?),
+            client: Arc::new(crate::make_client_config(identity, None)?),
         })
     }
 
-    pub fn new_from_configs(server_config: rustls::ServerConfig, client_config: rustls::ClientConfig) -> Result<Self, certificate::GenError> {
+    pub fn new_from_configs(server_config: Arc<rustls::ServerConfig>, client_config: Arc<rustls::ClientConfig>) -> Result<Self, certificate::GenError> {
         Ok(Self {
             server: server_config,
             client: client_config,
@@ -88,7 +88,7 @@ where
 
     fn upgrade_inbound(self, socket: C, _: Self::Info) -> Self::Future {
         async move {
-            let stream = futures_rustls::TlsAcceptor::from(Arc::new(self.server))
+            let stream = futures_rustls::TlsAcceptor::from(self.server)
                 .accept(socket)
                 .await
                 .map_err(UpgradeError::ServerUpgrade)?;
@@ -119,7 +119,7 @@ where
                 Ipv4Addr::UNSPECIFIED,
             )));
 
-            let stream = futures_rustls::TlsConnector::from(Arc::new(self.client))
+            let stream = futures_rustls::TlsConnector::from(self.client)
                 .connect(name, socket)
                 .await
                 .map_err(UpgradeError::ClientUpgrade)?;
