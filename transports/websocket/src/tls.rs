@@ -20,7 +20,7 @@
 
 use std::{fmt, io, sync::Arc};
 
-use futures_rustls::{rustls, TlsAcceptor, TlsConnector};
+use futures_rustls::{rustls::{self, server::ResolvesServerCert}, TlsAcceptor, TlsConnector};
 
 /// TLS configuration.
 #[derive(Clone)]
@@ -126,6 +126,17 @@ impl Builder {
             .with_no_client_auth()
             .with_single_cert(certs, key.0)
             .map_err(|e| Error::Tls(Box::new(e)))?;
+        self.server = Some(server);
+        Ok(self)
+    }
+
+    pub fn server_from_resolver(&mut self, resolver: Arc<dyn ResolvesServerCert>) -> Result<&mut Self, Error> {
+        let provider = rustls::crypto::ring::default_provider();
+        let server = rustls::ServerConfig::builder_with_provider(provider.into())
+            .with_safe_default_protocol_versions()
+            .unwrap()
+            .with_no_client_auth()
+            .with_cert_resolver(resolver);
         self.server = Some(server);
         Ok(self)
     }
