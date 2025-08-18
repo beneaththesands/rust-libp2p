@@ -42,8 +42,8 @@ macro_rules! impl_tcp_builder {
             ///     .with_tokio()
             ///     .with_tcp(
             ///         Default::default(),
-            ///         (libp2p_tls::Config::new, libp2p_noise::Config::new),
-            ///         libp2p_yamux::Config::default,
+                ///         (libp2p_tls::Config::new, libp2p_noise::Config::new),
+                ///         libp2p_yamux::Config::default,
             ///     )?
             /// # ;
             /// # Ok(())
