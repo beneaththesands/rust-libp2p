@@ -1659,8 +1659,8 @@ impl fmt::Display for ListenError {
                 f,
                 "Listen error: Unexpected peer ID {obtained} at {endpoint:?}."
             ),
-            ListenError::Transport(_) => {
-                write!(f, "Listen error: Failed to negotiate transport protocol(s)")
+            ListenError::Transport(error) => {
+                write!(f, "Listen error: Failed to negotiate transport protocol(s): {:?}", error)
             }
             ListenError::Denied { cause } => {
                 write!(f, "Listen error: Denied: {cause}")
